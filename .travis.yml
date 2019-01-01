@@ -1,29 +1,37 @@
+os:
+  - linux
+dist: xenial
 language: php
-
 php:
   - 7.1.25
   - 7.2.13
-  - 7.3.0
-
+sudo: required
+cache:
+  directories:
+    - "$HOME/.composer/cache"
 addons:
-  postgresql: "10"
-  apt:
-    packages:
-    - postgresql-10
-    - postgresql-client-10
-env:
-  global:
-  - PGPORT=5432
-
+  postgresql: '10'
+services:
+  - postgresql
 before_script:
-  - psql -c 'create database homestead;' -U postgres
   - cp .env.travis .env
+  - psql -c 'create database travis_ci;' -U postgres
   - composer self-update
-  - composer install --no-interaction
-
+  - composer install --dev --prefer-source --no-interaction
+  - php artisan key:generate
+  - composer dump-autoload
+  - sudo chmod -R ug+rwx storage bootstrap/cache
+  - php artisan config:cache
+  - nvm install 8.11.1
+  - npm install npm@latest -g
+  - npm install -g yarn
+  - yarn
+  - npm run development
 script:
   - vendor/bin/phpunit --testdox
-
 notifications:
   slack:
-    secure: TtRf+kk5HboooACdRUn/YKTZHJzG/AUC6pjTAZjJjhm9UUnTkRfodcdpnhhdd4o3fp/w0m88P2h4kgUvHwGWV+BoHBl94TPYm8EdMRshWfdfREwfC/lN9OP+DCXCPjG5tJR+h5EObo/j4yWCyX6D7pQq2vnerdtHMOQz5o7kHriwcCUJ0UhbR/SPb9nZqJw6edNY7XDDOPlf9bGaUgWa0ldTknZVyDPYb/+6i9NxhLChP7v4Lb+DmyWd+qtMgWg7J43r8qKI1WNQ/+mn9S/36POU3Hx+3WNs4LL3Wpp1X12rdhs0YO/7fvj0gvqgbNQ+du/R8BBG/HRH7Eq3YyAduG82Zrm2sJ36SlePiPnt2UUaT+cS7btM0clO8lGJrRn6FNKIipY4egF2x0HUAHjIlGiuXaX0N5pX9+45RmfHqaW6Fs21hh0fgIBOkzLAmde5or6b1RG8O+c/sLKusTjTi6wYur4qp0TgTa1Vx6kE2AB9PQUo0fmHA78P1hld/D9EgVslqgncjn0IsrvQQ1bPfBFy6RrynNLKoLOOMVjKPeigoFAb6j71lpZgDgeb1XpY19WL4+rhKOJ/MoU5FPfrzU/22BXtmhKm+MLXaGEN9RY2Oxv7WacCta4oCU2t2GFgx7F5aINZ7TOx6kUnks7mb3iRG9hv7jpT/Q/hZCwL6f0=
+    secure: VWC0bxDMPnhciL2DzHuYd8x2uVlzx+UbddBqmqdk0ncjkGH9UZJn2AZobnih7AWh7BTi4KVGmf1p3C5jBXkyzbzFv9qo1PBuDyoWA4ZxIfvFyTn34jPEaVoWA/rHeKOFe756hlvszWnJ+jxbDVJe9qXUFRfpcY0A2Vb80H45Io7iexJ3ABRFU1PkmQh8IHNnC4eRozdCvGRhZ1eXpIBGnQ8BSmTy9bi7lD6GL9vQIKhdNlybQG4mBDM9crOtt2zugvuCNB1rSfTsP2vuvmgECreVa3NdDGzd6yR4lIgLrsoRA7mSmSpB4aBubESPMTZGjEjFMqZYDaZP+Fiay1KG3M7i/A1lgCvvSVWl9df4zNWLjfQaLhJct7l93Ga+kk92gazdAa7s7apL15tTlfjtPfmPPtiipCtuM8KZ8/qWkg1Z1Cx0r4QS5Q3HT5/L7qw+g4LscAIe0HvrsnZLcq9iep/CJ+mEIKR55PzTnfW0W3APFeZ6h0Pcwc2LSXjMIz8bFQZR/Ou+CDnYNI47eoKxkmiGP94EojP/d40arNPAt2ueUGZUZGL3FyTZA6hFCm54GzJsuPnj+3h51qiigqvb0td47Xjezr8OGJe4AVAI6vRMX9a0SIvIn3czuHjIJatS3UbdHDxrwDmosfB8PiZc4OctJVVl51sGN8ffAgkzSIc=
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
