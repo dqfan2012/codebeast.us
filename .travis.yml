@@ -1,12 +1,12 @@
 language: php
 
 php:
-  - 7.1
-  - 7.2
-  - 7.3
+  - 7.1.25
+  - 7.2.13
+  - 7.3.0
 
 addons:
-  postgresql: "11"
+  postgresql: "11.1"
   apt:
     packages:
     - postgresql-11
