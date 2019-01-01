@@ -6,10 +6,11 @@ php:
   - 7.3.0
 
 addons:
-  postgresql: "11.1"
+  postgresql: "10"
   apt:
     packages:
-    - postgresql-11
+    - postgresql-10
+    - postgresql-client-10
 env:
   global:
   - PGPORT=5432
